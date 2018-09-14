@@ -17,6 +17,14 @@
 #
 
 
+config MBEDTLS_EXTERNAL_CONFIG
+	bool
+	help
+	  This internal option controls if mbedTLS is configured by external
+	  Kconfig file.
+
+if !MBEDTLS_EXTERNAL_CONFIG
+
 menuconfig MBEDTLS
 	bool "mbedTLS Support"
 	help
@@ -145,5 +153,7 @@ config APP_LINK_WITH_MBEDTLS
 	  Add MBEDTLS header files to the 'app' include path. It may be
 	  disabled if the include paths for MBEDTLS are causing aliasing
 	  issues for 'app'.
+
+endif
 
 endif
