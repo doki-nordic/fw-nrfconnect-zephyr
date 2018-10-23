@@ -38,6 +38,8 @@ void quit(void)
 	k_sem_give(&quit_lock);
 }
 
+#define PSK_TAG 2
+
 static void init_app(void)
 {
 	k_sem_init(&quit_lock, 0, UINT_MAX);
@@ -60,14 +62,63 @@ static void init_app(void)
 	if (err < 0) {
 		NET_ERR("Failed to register private key: %d", err);
 	}
+
+	err = tls_credential_add(PSK_TAG,
+				     TLS_CREDENTIAL_PSK,
+				     "user",
+				     4);
+	if (err < 0) {
+		NET_ERR("Failed to register PSK: %d", err);
+	}
+
+
+	err = tls_credential_add(PSK_TAG,
+				 TLS_CREDENTIAL_PSK_ID,
+				 "user", 5);
+	if (err < 0) {
+		NET_ERR("Failed to register PSK_ID: %d", err);
+	}
 #endif
 
 	init_vlan();
 }
 
+static uint8_t _mbedtls_heap[65536];
+
+void __weak exit(int code)
+{
+	printk("Fatal mbedTLS exit!!!\n");
+	volatile int *x = 0;
+	*x = 123;
+}
+
+#if defined(CONFIG_MBEDTLS)
+#if !defined(CONFIG_MBEDTLS_CFG_FILE)
+#include "mbedtls/config.h"
+#else
+#include CONFIG_MBEDTLS_CFG_FILE
+#endif
+#endif
+
+#include "mbedtls/ssl.h"
+
 void main(void)
 {
+	void CRYPTOCELL_IRQHandler(void*);
+	IRQ_CONNECT(42, 1, CRYPTOCELL_IRQHandler, NULL, 0);
+	irq_enable(42);
+
+	mbedtls_memory_buffer_alloc_init(_mbedtls_heap, sizeof(_mbedtls_heap));
+
+	//mbedtls_debug_set_threshold(100);
+
 	init_app();
+
+	int *l;
+	for (l = mbedtls_ssl_list_ciphersuites(); *l; l++)
+	{
+		printk("%04X %s\n", *l, mbedtls_ssl_get_ciphersuite_name(*l));
+	}
 
 	if (IS_ENABLED(CONFIG_NET_TCP)) {
 		start_tcp();

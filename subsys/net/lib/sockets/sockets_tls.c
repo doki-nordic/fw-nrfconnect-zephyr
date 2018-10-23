@@ -162,8 +162,7 @@ static void tls_debug(void *ctx, int level, const char *file,
 		}
 	}
 
-	NET_DBG("%s:%04d: |%d| %s", basename, line, level,
-		log_strdup(str));
+	printk("%s:%04d: |%d| %s\n", basename, line, level, (str));
 }
 #endif /* defined(MBEDTLS_DEBUG_C) && defined(CONFIG_NET_TLS_DEBUG) */
 
@@ -279,6 +278,7 @@ static int tls_init(struct device *unused)
 	}
 
 #if defined(MBEDTLS_DEBUG_C) && (NET_LOG_LEVEL >= LOG_LEVEL_DBG)
+	printk("mbedtls_debug_set_threshold %d\n", CONFIG_MBEDTLS_DEBUG_LEVEL);
 	mbedtls_debug_set_threshold(CONFIG_MBEDTLS_DEBUG_LEVEL);
 #endif
 
@@ -322,7 +322,13 @@ static struct tls_context *tls_alloc(void)
 #endif
 
 #if defined(MBEDTLS_DEBUG_C) && (NET_LOG_LEVEL >= LOG_LEVEL_DBG)
+		tls->ssl.conf = &tls->config;
 		mbedtls_ssl_conf_dbg(&tls->config, tls_debug, NULL);
+		printk("mbedtls_ssl_conf_dbg\n");
+		{
+		const mbedtls_ssl_context *ssl = (&tls->ssl);
+		MBEDTLS_SSL_DEBUG_MSG(0, ("To jest test!"));
+		}
 #endif
 	} else {
 		NET_WARN("Failed to allocate TLS context");
@@ -635,7 +641,7 @@ static int tls_set_psk(struct tls_context *tls,
 	int err = mbedtls_ssl_conf_psk(&tls->config,
 				       psk->buf, psk->len,
 				       (const unsigned char *)psk_id->buf,
-				       psk_id->len - 1);
+				       psk_id->len - 1); // TODO: Why -1???
 	if (err != 0) {
 		return -EINVAL;
 	}

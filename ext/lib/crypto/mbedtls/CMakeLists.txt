@@ -102,18 +102,47 @@ elseif(CONFIG_MBEDTLS_LIBRARY)
   # NB: CONFIG_MBEDTLS_LIBRARY is not regression tested and is
   # therefore susceptible to bit rot
 
-  target_include_directories(mbedTLS INTERFACE
-	${CONFIG_MBEDTLS_INSTALL_PATH}
+  #target_include_directories(mbedTLS INTERFACE
+#	${CONFIG_MBEDTLS_INSTALL_PATH}
+#	)
+#
+  #zephyr_link_libraries(
+  #  mbedtls_external
+  #  -L${CONFIG_MBEDTLS_INSTALL_PATH}
+  #  gcc
+  #  )
+  ## Lib mbedtls_external depends on libgcc (I assume?) so to allow
+  ## mbedtls_external to link with gcc we need to ensure it is placed
+  ## after mbedtls_external on the linkers command line.
+#
+  #target_link_libraries(mbedTLS INTERFACE zephyr_interface)
+
+
+  target_compile_definitions(mbedTLS INTERFACE
+	MBEDTLS_CONFIG_FILE="${CONFIG_MBEDTLS_CFG_FILE}"
 	)
 
+  target_include_directories(mbedTLS INTERFACE
+  /dk/sec/nrf_cc3xx/nrf_mbedtls/include
+  /dk/sec/nrf_cc3xx/cc310_custom/shared/hw/include
+  /dk/sec/nrf_cc3xx/cc310_custom/host/src/cc3x_lib
+  /dk/sec/nrf_cc3xx/cc312_sw/shared/include/pal/no_os
+  /dk/sec/nrf_cc3xx/cc312_sw/shared/include/pal
+  /dk/sec/nrf_cc3xx/cc312_sw/shared/hw/include
+  /dk/sec/nrf_cc3xx/cc312_sw/shared/include
+  /dk/sec/nrf_cc3xx/cc312_sw/shared/include/crypto_api
+  /dk/sec/nrf_cc3xx/cc312_sw/shared/include/crypto_api/cc3x
+  /dk/sec/nrf_cc3xx/cc312_sw/shared/include/mbedtls
+  /dk/sec/nrf_cc3xx/ext/mbedtls/include
+  /dk/sec/nrf_cc3xx/ext/mbedtls/include/mbedtls
+	)
+
+
   zephyr_link_libraries(
-    mbedtls_external
-    -L${CONFIG_MBEDTLS_INSTALL_PATH}
-    gcc
+	cc310_nrf52840_xxaa
+	-L/dk/sec/nrf_cc3xx/build/debug
+	gcc
     )
-  # Lib mbedtls_external depends on libgcc (I assume?) so to allow
-  # mbedtls_external to link with gcc we need to ensure it is placed
-  # after mbedtls_external on the linkers command line.
 
   target_link_libraries(mbedTLS INTERFACE zephyr_interface)
 

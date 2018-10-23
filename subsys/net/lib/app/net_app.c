@@ -34,6 +34,10 @@
 
 #include "net_app_private.h"
 
+#if defined(MBEDTLS_DEBUG_C)
+#error aaa
+#endif
+
 #if defined(CONFIG_NET_APP_DTLS_TIMEOUT)
 #define DTLS_TIMEOUT K_SECONDS(CONFIG_NET_APP_DTLS_TIMEOUT)
 #else
@@ -2218,6 +2222,7 @@ int _net_app_tls_init(struct net_app_ctx *ctx, int client_or_server)
 	mbedtls_ctr_drbg_init(&ctx->tls.mbedtls.ctr_drbg);
 
 #if defined(MBEDTLS_DEBUG_C) && NET_LOG_LEVEL >= LOG_LEVEL_DBG
+#error setr
 	mbedtls_debug_set_threshold(CONFIG_MBEDTLS_DEBUG_LEVEL);
 	mbedtls_ssl_conf_dbg(&ctx->tls.mbedtls.conf, my_debug, NULL);
 #endif

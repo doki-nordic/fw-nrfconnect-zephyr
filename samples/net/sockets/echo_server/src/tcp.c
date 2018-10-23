@@ -67,7 +67,7 @@ static int start_tcp_proto(struct data *data, struct sockaddr *bind_addr,
 
 #if defined(CONFIG_NET_SOCKETS_SOCKOPT_TLS)
 	sec_tag_t sec_tag_list[] = {
-		SERVER_CERTIFICATE_TAG,
+		SERVER_CERTIFICATE_TAG,2,
 	};
 
 	ret = setsockopt(data->tcp.sock, SOL_TLS, TLS_SEC_TAG_LIST,
